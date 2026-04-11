@@ -1,0 +1,42 @@
+name: MyDungeon
+version: '${project.version}'
+main: org.ThienNguyen.Main
+api-version: '1.21'
+author: ThienNguyen
+description: Plugin quản lý hệ thống Dungeon đơn và tổ đội cho server Windycraft.
+
+commands:
+  dungeon:
+    description: Lệnh chính để tham gia và quản lý phó bản.
+    usage: /dungeon [join|leave|setup|reload]
+    permission: mydungeon.user
+    aliases: [dg, phoban]
+  party:
+    description: Lệnh quản lý tổ đội đi phó bản.
+    usage: /party [create|invite|accept|kick|disband]
+    permission: mydungeon.party.use
+    aliases: [pt, todoi]
+
+permissions:
+  # Nhóm quyền cho người chơi
+  mydungeon.user:
+    description: Cho phép sử dụng các lệnh cơ bản của dungeon.
+    default: true
+  mydungeon.party.use:
+    description: Cho phép tạo và tham gia tổ đội.
+    default: true
+
+  # Nhóm quyền cho quản trị viên (Admin)
+  mydungeon.admin:
+    description: Toàn quyền thiết lập và quản trị hệ thống Dungeon.
+    default: op
+    children:
+      mydungeon.setup: true
+      mydungeon.reload: true
+
+  mydungeon.setup:
+    description: Cho phép tạo khu vực phó bản và đặt checkpoint.
+    default: op
+  mydungeon.reload:
+    description: Cho phép tải lại cấu hình plugin (config.yml, message.yml).
+    default: op

@@ -1,0 +1,105 @@
+# mob-spawn-animation:
+#   mode: instant
+#   random-radius: 10.0     # vẫn random X/Z nếu muốn phân tán
+#   spawn-particle:
+#     enabled: true
+#     type: EXPLOSION_LARGE   # hiệu ứng nổ lớn khi spawn hàng loạt
+#     count: 30
+#     offset: 0.8
+#     speed: 0.2
+# mob-spawn-animation:
+#   mode: delayed
+#   delay-ticks: 15         # 0.75 giây / batch
+#   batch-size: 4           # 4 con mỗi lần
+#   random-radius: 6.0      # phân tán nhẹ
+#   spawn-particle:
+#     enabled: true
+#     type: PORTAL            # hiệu ứng cổng triệu hồi
+#     count: 20
+#     offset: 0.5
+#     speed: 0.12
+mob-spawn-animation:
+  mode: random-radius
+  delay-ticks: 20
+  random-radius: 8.0          # tăng lên 8–10 để rõ rệt hơn
+  batch-size: 2               # ← sửa chỗ này, đặt ít nhất 1, khuyến nghị 2–4
+  spawn-particle:
+    enabled: true
+    type: SMOKE_NORMAL
+    count: 15
+    offset: 0.4
+    speed: 0.1
+  spawn-sound:
+    enabled: true
+    sound: ENTITY_ZOMBIE_INFECT
+    volume: 0.8
+    pitch: 1.0
+dungeon-settings:
+  show-time-bossbar: true
+  # Cho phép quái vật gây sát thương lẫn nhau trong dungeon không?
+  # false = Quái không đánh được nhau (mặc định)
+  # true = Quái có thể đánh nhau bình thường
+  allow-mob-damage: false
+# ==================== CẤM LỆNH TRONG PHÓ BẢN ====================
+dungeon-command-restriction:
+  # true = CẤM TẤT CẢ lệnh, chỉ cho phép /dungeon và /party
+  # false = Chỉ cấm những lệnh liệt kê bên dưới
+  enabled: false
+
+  # Chỉ có hiệu lực khi enabled: false
+  blocked-commands:
+    - "home"
+    - "tpa"
+    - "tpaccept"
+    - "warp"
+    - "spawn"
+    - "sethome"
+    - "back"
+    - "rtp"
+    - "wild"
+    - "ec"        # enderchest
+    - "wb"        # workbench
+    # Bạn có thể thêm tùy ý
+placeholders:
+  distance-format: "&e%.1f blocks"
+  targets-left-format: "&c%d còn lại"
+  mob-name-format: "&f%s"
+  lives-left-format: "&a%d mạng còn lại"
+  time-left-format: "&b%s" # Màu xanh cho thời gian placeholder có dạng %dungeon_<config>% ví dụ %dungeon_mob_name_format%
+scoreboard:
+  enabled: true # custom scoreboard trong phó bản
+  # Kết hợp icon đặc biệt của bạn và display-name động
+  title: "&e%display_name%"
+  lines:
+    - "&7--------------------"
+    - "&6 Nhiệm vụ hiện tại:"
+    - " &f| &a%quest_name%"
+    - ""
+    - "&6 Tiến độ:"
+    - " &f| &7Mục tiêu: &f%dungeon_mythic_mob_name%"
+    - " &f| &7Còn lại: %dungeon_mythic_targets_left%"
+    - " &f| &7Khoảng cách: %dungeon_distance_to_reach%"
+    - ""
+    - "&6 Trạng thái:"
+    - " &f| %dungeon_lives_left%"
+    - " &f| &7Thời gian: &b%dungeon_time_left%"
+    - "&f |&c Sát thương: %dungeon_damage_dealt%"
+    - "&f |&f Độ khó: %dungeon_difficulty%"
+    - "&7--------------------"
+    - "&e Nhà Văn Viết Code"
+difficulty-settings:
+  EASY:
+    health-multiplier: 1.0
+    damage-multiplier: 1.0
+    speed-multiplier: 1.0
+    display: "&aDễ"
+  HARD:
+    health-multiplier: 5.0 # máu x5 lần
+    damage-multiplier: 3.0 # damage x3 lần
+    speed-multiplier: 1.5  # Quái chạy nhanh hơn 50%
+    display: "&cKhó"
+  NIGHTMARE:
+    health-multiplier: 15.0
+    damage-multiplier: 8.0
+    speed-multiplier: 2.0  # Quái chạy nhanh gấp đôi
+    display: "&4&lÁC MỘNG"

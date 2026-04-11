@@ -1,0 +1,102 @@
+# Cấu hình hiển thị cho toàn bộ phó bản
+dungeon:
+  errors:
+    unauthorized-access: "&cRa Ngoài Mau! ?"
+  start:
+    usage: "&cSử dụng: /dungeon start <id>"
+    not-found: "&cKhông tìm thấy dữ liệu phó bản này!"
+    type-solo-only: "&cPhó bản đơn, vui lòng rời tổ đội trước!"
+    type-party-only: "&cPhó bản này yêu cầu phải tham gia theo tổ đội!"
+    not-leader: "&cChỉ trưởng nhóm mới có thể bắt đầu phó bản!"
+    invalid-size: "&cSố lượng thành viên không hợp lệ (Cần %min%-%max% người)!"
+    not-ready: "&cMột số thành viên trong đội chưa sẵn sàng!"
+    member-offline: "&cCó thành viên trong đội đang ngoại tuyến!"
+    already-in-dungeon: "&c%player% đang trong phó bản khác!"
+    not-enough-item: "&cKhông đủ: %item% &7(x%amount%)"
+    missing-template: "&cThiếu 'world-template' trong config!"
+    missing-map: "&cKhông tìm thấy map gốc: Worlds/%map%"
+    load-error: "&cLỗi: Không thể tải phó bản. Vui lòng thử lại!"
+    preparing: "&e&l[!] &fĐang chuẩn bị dữ liệu World..."
+    title: "&aBẮT ĐẦU"
+    subtitle: "&fVào sau %time%s"
+  restrictions:
+    fly-disabled: "&c&l[!] &fPhó bản này không cho phép sử dụng khả năng bay!"
+    elytra-disabled: "&c&l[!] &fPhó bản này không cho phép sử dụng Elytra!"
+  quit:
+    title: "&c&lKẾT THÚC SỚM"
+    subtitle: "&fBạn đã rời phó bản. Thoát khỏi khu vực sau &e%time% &fgiây..."
+  fail:
+    title: "&4&lTHẤT BẠI"
+    subtitle: "&7Ánh sáng dần tắt... Bạn sẽ bị trục xuất sau &e%time% &fgiây"
+  win:
+    title: "&6&lCHIẾN THẮNG VĨ ĐẠI"
+    subtitle: "&f Vinh quang thuộc về bạn! Rời phó bản sau &e%time% &fgiây"
+  quit-limit-time: "&e&l[THỜI GIAN] &fBạn đã bị đẩy ra khỏi phó bản vì hết thời gian quy định."
+  time-limit-bossbar: "&f&lThời gian còn lại: &e%time% &fgiây"
+  time-out: "&c&l[HẾT GIỜ] &fThời gian hoàn thành phó bản đã kết thúc!"
+  stage-progress: "&7Tiến độ hiện tại: &e%current%/%goal% &7mục tiêu"
+  start-message: "&a&lDungeon &8× &fHành trình nguy hiểm bắt đầu! Chúc may mắn!"
+  stage:
+    waiting-next: "&e&l[!] &fĐợt quái tiếp theo sẽ xuất hiện sau &b%time%s"
+    progress: "&7Tiến độ: &e%current%/%goal%"
+    checkpoint-updated: "§a§l[!] §fĐiểm hồi sinh của đội đã được cập nhật tại đây."
+respawn:
+  title: "&e&lHỒI SINH"
+  subtitle: "&fBạn sẽ tỉnh lại sau &e%time% &fgiây..."
+  message: "&a&l[!] &fBạn đã hồi sinh! Hãy cẩn thận hơn trong lần tới."
+
+party:
+  # Trạng thái sẵn sàng
+  member-ready: "&6&l[ĐỘI] &e%player% &f%status% sẵn sàng cho &b%id%"
+  status-ready: "&a&l● SẴN SÀNG"
+  status-not-ready: "&7○ CHƯA SẴN SÀNG"
+
+  # Mời & gia nhập
+  invite-sent: "&a&l[THÀNH CÔNG] &fĐã gửi lời mời gia nhập tổ đội tới &e%target%&f."
+  invite-received:
+    - "&b&l[TỔ ĐỘI] &fNgười chơi &e%player% &fmời bạn tham gia &b%name%&f."
+    - "  &a&l➜ &fGõ &n/party accept &fđể tham gia ngay!"
+  member-joined: "&a&l[+] &e%player% &fđã gia nhập tổ đội!"
+
+  # Quản lý thành viên
+  member-kicked-target: "&c&l[TRỤC XUẤT] &fBạn đã bị trưởng nhóm mời ra khỏi tổ đội."
+  member-kicked-broadcast: "&c&l[−] &e%player% &fđã bị trục xuất khỏi tổ đội."
+  new-leader-broadcast: "&6&l★ &e%player% &fđã trở thành &lTrưởng Nhóm &fmới!"
+  promote-success: "&a&l[NHƯỜNG QUYỀN] &fBạn đã chuyển quyền trưởng nhóm cho &e%player%&f."
+
+  # Rời & giải tán
+  player-left: "&c&l[−] &e%player% &fđã rời khỏi tổ đội."
+  party-disbanded: "&c&l[GIẢI TÁN] &fTổ đội đã bị trưởng nhóm giải tán."
+
+  # Lỗi / thông báo hệ thống
+  error:
+    no-invite: "&c&l[LỖI] &fBạn không có lời mời tổ đội nào đang chờ."
+    already-in-party: "&c&l[LỖI] &fBạn đang ở trong một tổ đội khác rồi!"
+    must-leave-first: "&c&l[LỖI] &fHãy rời tổ đội hiện tại trước đã."
+    not-leader: "&c&l[LỖI] &fChỉ trưởng nhóm mới có quyền thực hiện lệnh này!"
+    target-not-found: "&c&l[LỖI] &fKhông tìm thấy người chơi đó."
+    cannot-invite-self: "&c&l[LỖI] &fBạn không thể mời chính mình!"
+
+gui:
+  # party-title: "&a&lTỔ ĐỘI &8× &e%name%"
+  member-lore:
+    - ""
+    - " &6&lChức vụ: &f%role%"
+    - " &b&lTrạng thái: &f%status%"
+    - "%admin_actions%"
+  role-leader: "&6&l★ Trưởng Nhóm"
+  role-member: "&fThành Viên"
+  status-ready: "&a&l● Sẵn Sàng"
+  status-not-ready: "&7○ Chưa Sẵn Sàng"
+  admin-lore-kick:
+    - ""
+    - " &e&l→ &fShift + Chuột trái &8→ &cĐuổi khỏi đội"
+    - " &e&l→ &fShift + Chuột phải &8→ &6Nhường quyền Trưởng Nhóm"
+  button-ready: "&a&l✔ SẴN SÀNG CHIẾN ĐẤU"
+  button-not-ready: "&c&l✘ CHƯA SẴN SÀNG"
+  button-disband: "&4&l✖ GIẢI TÁN TỔ ĐỘI"
+  button-leave: "&c&l← THOÁT KHỎI TỔ ĐỘI"
+damage-summary:
+  header: "&6&l⭐ BẢNG XẾP HẠNG SÁT THƯƠNG ⭐"
+  format: "&e#%rank%. &b%player% &7- &f%damage% &csát thương"
+  footer: "" # Để trống nếu không muốn dùng
