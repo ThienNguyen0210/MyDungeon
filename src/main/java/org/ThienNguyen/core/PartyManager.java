@@ -14,12 +14,12 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class PartyManager {
-    // RAM Cache: Giữ nguyên để các Listener (như ExpShare) truy xuất cực nhanh
+    
     private final Map<UUID, Party> playerPartyMap = new ConcurrentHashMap<>();
     private final Map<UUID, Party> invites = new ConcurrentHashMap<>();
 
     private Database getDB() {
-        return Main.getInstance().getDatabase(); // Giả sử Main có getter này
+        return Main.getInstance().getDatabase(); 
     }
 
     private String getMsg(String path, String def) {
@@ -27,20 +27,20 @@ public class PartyManager {
                 Main.getInstance().getMessagesConfig().getString(path, def));
     }
 
-    // --- LOGIC TẠO NHÓM ---
+    
     public void createParty(Player leader, String name) {
         if (playerPartyMap.containsKey(leader.getUniqueId())) {
             leader.sendMessage(getMsg("party-manager.already-in-party", "§cBạn đã ở trong một tổ đội rồi!"));
             return;
         }
 
-        // 1. Lưu vào Database trước (Async)
+        
         Bukkit.getScheduler().runTaskAsynchronously(Main.getInstance(), () -> {
             int partyId = getDB().createParty(leader.getUniqueId(), name);
-            // 2. Sau khi DB xong, quay lại Main Thread để cập nhật RAM
+            
             Bukkit.getScheduler().runTask(Main.getInstance(), () -> {
                 Party party = new Party(leader.getUniqueId(), name);
-                party.setDatabaseId(partyId); // Bạn nên thêm field partyId vào class Party
+                party.setDatabaseId(partyId); 
 
                 playerPartyMap.put(leader.getUniqueId(), party);
                 party.setReady(leader.getUniqueId(), true);
@@ -52,7 +52,7 @@ public class PartyManager {
         });
     }
 
-    // --- LOGIC GIA NHẬP ---
+    
     public void acceptInvite(Player player) {
         Party party = invites.get(player.getUniqueId());
         if (party == null) {
@@ -65,11 +65,11 @@ public class PartyManager {
             return;
         }
 
-        // 1. Cập nhật SQLite (Async)
+        
         Bukkit.getScheduler().runTaskAsynchronously(Main.getInstance(), () -> {
             getDB().addMemberToParty(player.getUniqueId(), party.getDatabaseId());
 
-            // 2. Cập nhật RAM
+            
             Bukkit.getScheduler().runTask(Main.getInstance(), () -> {
                 joinParty(player, party);
                 invites.remove(player.getUniqueId());
@@ -94,10 +94,10 @@ public class PartyManager {
                     int id = rs.getInt("party_id");
                     UUID leaderUuid = UUID.fromString(rs.getString("leader_uuid"));
 
-                    // ✅ Lấy party_name thật từ DB thay vì tự đặt
+                    
                     String partyName = rs.getString("party_name");
                     if (partyName == null || partyName.isEmpty()) {
-                        partyName = "Party-" + id; // fallback an toàn
+                        partyName = "Party-" + id; 
                     }
 
                     Party party = new Party(leaderUuid, partyName);
@@ -124,28 +124,28 @@ public class PartyManager {
 
                 UUID memberUuid = UUID.fromString(uuidStr);
 
-                // 1. CHỐNG TRÙNG LẶP: Kiểm tra nếu thành viên chưa có trong List thì mới add
+                
                 if (!party.getMembers().contains(memberUuid)) {
                     party.getMembers().add(memberUuid);
                 }
 
-                // 2. CẬP NHẬT RAM: Đưa vào Map để PM có thể tìm thấy Party từ Player
+                
                 playerPartyMap.put(memberUuid, party);
 
-                // 3. ĐẶT TRẠNG THÁI: Nếu Party của bạn có hệ thống Ready, hãy set mặc định
+                
                 party.setReady(memberUuid, true);
             }
         } catch (SQLException e) {
             Main.getInstance().getLogger().severe("Lỗi khi load thành viên cho Party ID " + party.getDatabaseId() + ": " + e.getMessage());
         }
     }
-    // --- LOGIC GIẢI TÁN ---
+    
     public void disbandParty(Party party) {
-        // 1. Xóa trong SQLite
+        
         Bukkit.getScheduler().runTaskAsynchronously(Main.getInstance(), () -> {
             getDB().deleteParty(party.getDatabaseId());
 
-            // 2. Xóa trong RAM
+            
             Bukkit.getScheduler().runTask(Main.getInstance(), () -> {
                 String disbandMsg = getMsg("party-manager.party-disbanded", "§cTổ đội đã giải tán.");
                 for (UUID uuid : new ArrayList<>(party.getMembers())) {
@@ -160,7 +160,7 @@ public class PartyManager {
         });
     }
 
-    // --- CÁC HÀM HỖ TRỢ ---
+    
 
     public Party getParty(Player player) {
         return playerPartyMap.get(player.getUniqueId());
@@ -175,7 +175,7 @@ public class PartyManager {
         party.setReady(uuid, true);
     }
 
-    // Gửi mời (Không cần lưu DB vì lời mời chỉ có tác dụng khi online)
+    
     public void sendInvite(Player sender, Player target) {
         if (sender.getUniqueId().equals(target.getUniqueId())) {
             sender.sendMessage(getMsg("party-manager.cannot-invite-self", "§cBạn không thể tự mời chính bản thân mình!"));

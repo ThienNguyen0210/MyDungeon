@@ -46,7 +46,7 @@ public class Main extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new DungeonMobListener(), this);
         getServer().getPluginManager().registerEvents(new DungeonListener(), this);
         getServer().getPluginManager().registerEvents(new PartyListener(), this);
-//        Bukkit.getPluginManager().registerEvents(new FabledExpSharing(), this);
+
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new PlaceholderAPI(this).register();
         } else {

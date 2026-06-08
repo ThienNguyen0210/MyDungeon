@@ -65,7 +65,7 @@ public class CreateDungeon implements SubCommand {
             config.set("allow-fly", true);
             config.set("send-damage-summary", true);
 
-            // Base Defend
+            
             config.set("base-defend.enabled", true);
             config.set("base-defend.health", 50.0);
             config.set("base-defend.display-name", "&a&lCĂN CỨ");
@@ -76,23 +76,23 @@ public class CreateDungeon implements SubCommand {
             config.set("base-defend.zone-type", "CIRCLE");
             config.set("base-defend.fail-message", "&c&lCăn cứ đã bị san phẳng! Phó bản thất bại.");
 
-            // Damage Rewards
+            
             config.set("damage-rewards.enabled", true);
             config.set("damage-rewards.tiers.EASY", Arrays.asList("50000:10:1"));
             config.set("damage-rewards.tiers.HARD", Arrays.asList("100000:100:1", "500000:100:2"));
             config.set("damage-rewards.tiers.NIGHTMARE", Arrays.asList("1000000:50:2", "2000000:10:3"));
 
-            // Settings
-            // Both = cả party lẫn solo | Party = chỉ party | Solo = chỉ solo
+            
+            
             config.set("Settings.Type", "BOTH");
             config.set("Settings.MinPlayers", 1);
             config.set("Settings.MaxPlayers", 4);
 
-            // Time Limit
+            
             config.set("time-limit.enabled", true);
             config.set("time-limit.seconds", 600);
 
-            // Commands
+            
             config.set("start-commands", Arrays.asList("[CONSOLE] bc &e%player% &fđã vào hầm ngục &a" + id));
             config.set("quit-commands", Arrays.asList("[OP] bc &e%player% &frời khỏi phó bản."));
             config.set("win-commands", Arrays.asList(
@@ -103,7 +103,7 @@ public class CreateDungeon implements SubCommand {
             config.set("requires", Arrays.asList("2:1"));
             config.set("message-first", "&a&l[!] &fChào mừng đến với " + id);
 
-            // Break / Place Groups
+            
             config.set("break-groups.cong_chinh", Arrays.asList(
                     "10.0, 60.0, 10.0",
                     "10.0, 61.0, 10.0",
@@ -115,8 +115,8 @@ public class CreateDungeon implements SubCommand {
                     "22.0, 60.0, 20.0, COBBLESTONE"
             ));
 
-            // ========== STAGE 1: REACH_LOCATION ==========
-            // FIX: Thêm type cho stage 1, trước đây bị null → gây NullPointerException
+            
+            
             config.set("stages.1.type", "REACH_LOCATION");
             config.set("stages.1.message", "&fDi chuyển đến vị trí chỉ định!");
 
@@ -141,7 +141,7 @@ public class CreateDungeon implements SubCommand {
             reachTargets.add(target1);
             config.set("stages.1.targets", reachTargets);
 
-            // ========== STAGE 2: KILL_MYTHIC_MOB ==========
+            
             config.set("stages.2.type", "KILL_MYTHIC_MOB");
             config.set("stages.2.message", "&fTiêu diệt quái vật đang tấn công căn cứ!");
             config.set("stages.2.ai", true);
