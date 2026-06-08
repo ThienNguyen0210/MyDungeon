@@ -36,7 +36,13 @@
             <version>1.21-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
-
+        <dependency>
+            <groupId>com.sucy.skill</groupId>
+            <artifactId>fabled</artifactId>
+            <version>latest</version> <!-- Phiên bản có thể tùy chỉnh -->
+            <scope>system</scope>
+            <systemPath>${project.basedir}/libs/Fabled.jar</systemPath>
+        </dependency>
         <dependency>
             <groupId>io.lumine</groupId>
             <artifactId>MythicMobs</artifactId>

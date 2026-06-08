@@ -21,10 +21,10 @@ public class QuitDungeon implements SubCommand {
         final String worldName = player.getWorld().getName();
         final DungeonManager dm = Main.getInstance().getDungeonManager();
 
-        
+
         if (!worldName.startsWith("temp_")) {
             if (dm.getPlayerState(player) != DungeonManager.DungeonState.NONE) {
-                
+
                 dm.setPlayerState(player, DungeonManager.DungeonState.NONE);
                 dm.removeTimeBar(player);
                 DungeonScoreboard.removeScoreboard(player);
@@ -36,7 +36,7 @@ public class QuitDungeon implements SubCommand {
             return;
         }
 
-        
+
         if (dm.getPlayerState(player) == DungeonManager.DungeonState.END) {
             return;
         }

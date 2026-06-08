@@ -7,7 +7,8 @@
 
 # ID duy nhất của phó bản (dùng để gọi lệnh /dungeon join 1 hoặc trong requires)
 dungeon-id: '1' # không xài nhé id dungeon là <id>.yml
-
+is-tower-stage: true  # Có phải loại tầng không
+stage-number: 1       # Tầng số mấy
 # Tên hiển thị khi vào phó bản (hỗ trợ màu + &l)
 display-name: '&e&lTHỬ THÁCH HẦM NGỤC SLIME'
 
@@ -156,6 +157,7 @@ stages:
       - '[CONSOLE] bc %player% con cac'
     title: '&aTest'
     subtitle: '&eNasus'
+    reward-item-id: 5  # ID vật phẩm trong require.yml bạn muốn trao
   '2':
     type: REACH_LOCATION # Loại nhiệm vụ: Di chuyển đến vị trí
     targets: # Danh sách mục tiêu

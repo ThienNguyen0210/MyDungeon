@@ -6,6 +6,7 @@ import org.ThienNguyen.commands.DungeonTabCompleter;
 import org.ThienNguyen.commands.PartyCMD; 
 import org.ThienNguyen.commands.PartyTab;
 import org.ThienNguyen.core.*;
+import org.ThienNguyen.database.Database;
 import org.ThienNguyen.listeners.*;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -22,17 +23,18 @@ public class Main extends JavaPlugin {
     private DungeonManager dungeonManager;
     private PartyManager partyManager; 
     private BaseManager baseManager;
+    private Database database;
     @Override
     public void onEnable() {
         instance = this;
         saveDefaultConfig();
         createWorldsFolder();
         createExampleDungeon();
-        
+        this.database = new Database();
         this.dungeonManager = new DungeonManager();
         this.partyManager = new PartyManager();
         this.baseManager = new BaseManager();
-        
+        this.partyManager.loadAllPartiesFromDatabase();
         getServer().getPluginManager().registerEvents(new StaffPenaty(), this);
         getServer().getPluginManager().registerEvents(new DungeonDamageListener(), this);
         getServer().getPluginManager().registerEvents(new DungeonEditListener(), this);
@@ -43,7 +45,8 @@ public class Main extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new DungeonRequireListener(), this);
         getServer().getPluginManager().registerEvents(new DungeonMobListener(), this);
         getServer().getPluginManager().registerEvents(new DungeonListener(), this);
-        getServer().getPluginManager().registerEvents(new PartyListener(), this); 
+        getServer().getPluginManager().registerEvents(new PartyListener(), this);
+//        Bukkit.getPluginManager().registerEvents(new FabledExpSharing(), this);
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new PlaceholderAPI(this).register();
         } else {
@@ -215,5 +218,8 @@ public class Main extends JavaPlugin {
                 }
             }
         }
+    }
+    public Database getDatabase() {
+        return database;
     }
 }

@@ -322,43 +322,66 @@ public class DungeonManager {
         }
     }
     public void nextStage(Player player) {
-        
+        // 1. Kiểm tra trạng thái người chơi
         if (getPlayerState(player) == DungeonState.END) {
             return;
         }
-        
-
-        
-        int nextIndex = getCurrentStageIndex(player) + 1;
-        setCurrentStageIndex(player, nextIndex);
 
         String worldName = player.getWorld().getName();
-        cancelGuard(worldName);
-        setStageProgress(worldName, 0);
-
         if (!worldName.startsWith("temp_")) return;
         String dungeonId = worldName.split("_")[1];
 
-        
+        // 2. Lấy chỉ số Stage vừa hoàn thành và file cấu hình
+        int currentIndex = getCurrentStageIndex(player);
+        File dungeonFile = new File(Main.getInstance().getDataFolder(), "Dungeons/" + dungeonId + ".yml");
+        YamlConfiguration config = YamlConfiguration.loadConfiguration(dungeonFile);
+
+        // 3. LOGIC TRAO THƯỞNG: Give item từ require cho toàn bộ player trong world
+        // Giả sử bạn cấu hình ID phần thưởng tại: stages.<số tầng>.reward-item-id
+        String rewardPath = "stages." + currentIndex + ".reward-item-id";
+        if (config.contains(rewardPath)) {
+            int itemId = config.getInt(rewardPath);
+            ItemStack reward = getRequireItems().get(itemId); // Lấy từ Map requireItems
+
+            if (reward != null) {
+                for (Player p : player.getWorld().getPlayers()) {
+                    // Chỉ trao thưởng cho những người chưa kết thúc phó bản
+                    if (getPlayerState(p) != DungeonState.END) {
+                        p.getInventory().addItem(reward.clone());
+
+                        // Gửi thông báo nhận quà (lấy từ messages.yml nếu có)
+                        String rewardMsg = Main.getInstance().getMessagesConfig()
+                                .getString("dungeon.stage.reward-received", "&a&l[!] &fBạn đã nhận được phần thưởng hoàn thành Stage!");
+                        p.sendMessage(ChatColor.translateAlternateColorCodes('&', rewardMsg));
+                    }
+                }
+            }
+        }
+
+        // 4. CHUYỂN SANG STAGE TIẾP THEO
+        int nextIndex = currentIndex + 1;
+        setCurrentStageIndex(player, nextIndex);
+
+        cancelGuard(worldName);
+        setStageProgress(worldName, 0);
+
         DungeonStage next = getCurrentStage(player, dungeonId);
 
         if (next != null) {
+            // Hiển thị message của stage mới
             String msg = next.getMessage();
             if (msg != null && !msg.isEmpty()) {
                 player.sendMessage(ChatColor.translateAlternateColorCodes('&', msg));
             }
 
-            
+            // Xử lý spawn mob cho stage tiếp theo
             if (next.getType().equalsIgnoreCase("KILL_MYTHIC_MOB")) {
-                File dungeonFile = new File(Main.getInstance().getDataFolder(), "Dungeons/" + dungeonId + ".yml");
-                YamlConfiguration config = YamlConfiguration.loadConfiguration(dungeonFile);
                 int delaySeconds = config.getInt("stages." + nextIndex + ".delay", 0);
 
                 if (delaySeconds > 0) {
                     new BukkitRunnable() {
                         @Override
                         public void run() {
-                            
                             if (player.isOnline() &&
                                     player.getWorld().getName().equals(worldName) &&
                                     getPlayerState(player) != DungeonState.END) {
@@ -371,11 +394,63 @@ public class DungeonManager {
                 }
             }
         } else {
-            
+            // Nếu không còn stage nào thì thắng
             winDungeon(player);
         }
     }
+    public boolean canEnterTower(Player player, String dungeonId) {
+        // LỚP 1: Kiểm tra cấu hình trong file .yml của Dungeon cụ thể
+        FileConfiguration dCfg = getDungeonConfig(dungeonId);
 
+        // Nếu config không tồn tại hoặc is-tower-stage là false -> Cho vào luôn (Bỏ qua Database)
+        if (dCfg == null || !dCfg.getBoolean("is-tower-stage", false)) {
+            return true;
+        }
+
+        // LỚP 2: Chỉ khi is-tower-stage là TRUE mới kiểm tra Database SQLite
+        int stageNum = dCfg.getInt("stage-number", 0);
+        long lastWin = Main.getInstance().getDatabase().getLastWin(player.getUniqueId(), stageNum);
+
+        // Lấy thời gian hồi từ config.yml (mặc định 1 ngày nếu thiếu)
+        int cooldownSeconds = Main.getInstance().getConfig().getInt("tower-settings.reset-times." + stageNum, 86400);
+        long currentTime = System.currentTimeMillis();
+
+        // Kiểm tra nếu vẫn còn trong thời gian cooldown
+        if (currentTime - lastWin < cooldownSeconds * 1000L) {
+            long secondsLeft = (cooldownSeconds * 1000L - (currentTime - lastWin)) / 1000;
+
+            // Gửi thông báo với định dạng chi tiết: Ngày, Giờ, Phút
+            player.sendMessage("§c[!] Bạn phải chờ §e" + formatDetailedTime((int)secondsLeft) + " §cđể đánh lại tầng này.");
+            return false;
+        }
+
+        return true;
+    }
+    public String formatDetailedTime(int totalSeconds) {
+        if (totalSeconds <= 0) return "0 phút";
+
+        int days = totalSeconds / 86400;
+        int hours = (totalSeconds % 86400) / 3600;
+        int minutes = (totalSeconds % 3600) / 60;
+        int seconds = totalSeconds % 60;
+
+        StringBuilder sb = new StringBuilder();
+
+        if (days > 0) {
+            sb.append(days).append(" ngày ");
+        }
+        if (hours > 0 || days > 0) { // Hiện giờ nếu có ngày hoặc có giờ
+            sb.append(hours).append(" giờ ");
+        }
+        if (minutes > 0 || hours > 0 || days > 0) {
+            sb.append(minutes).append(" phút ");
+        }
+        if (sb.length() == 0) { // Nếu dưới 1 phút thì hiện giây
+            sb.append(seconds).append(" giây");
+        }
+
+        return sb.toString().trim();
+    }
     public void winDungeon(Player player) {
         World world = player.getWorld();
         if (world == null) return;
@@ -433,12 +508,11 @@ public class DungeonManager {
             
         }
 
+
         
         new BukkitRunnable() {
             @Override
             public void run() {
-                
-                fullCleanupDungeon(worldName);
                 shutdownDungeon(worldName, "WIN");
             }
         }.runTaskLater(Main.getInstance(), quitTimeSeconds * 20L);
@@ -733,8 +807,10 @@ public class DungeonManager {
         String worldName = world.getName();
         if (!worldName.startsWith("temp_")) return;
 
-        
-        
+
+        // --- THÊM ĐOẠN NÀY ĐỂ ĐÁNH DẤU THAM GIA ---
+
+        // ------------------------------------------
         for (Player p : world.getPlayers()) {
             p.setGameMode(GameMode.SPECTATOR);
             p.playSound(p.getLocation(), Sound.ENTITY_VILLAGER_NO, 1f, 1f);
@@ -1059,13 +1135,15 @@ public class DungeonManager {
         if (!file.exists()) return null;
         return YamlConfiguration.loadConfiguration(file);
     }
-    
+
     public void shutdownDungeon(String worldName, String reason) {
         Main.getInstance().getBaseManager().cleanup(worldName);
         World world = Bukkit.getWorld(worldName);
-        if (world == null) return;
+        if (world == null) {
+            forceDeleteWorld(worldName); // world đã unload rồi, xóa folder luôn
+            return;
+        }
 
-        
         String dungeonId = worldName.split("_")[1];
         File dungeonFile = new File(Main.getInstance().getDataFolder(), "Dungeons/" + dungeonId + ".yml");
         YamlConfiguration config = YamlConfiguration.loadConfiguration(dungeonFile);
@@ -1074,7 +1152,6 @@ public class DungeonManager {
         int waitTime = config.getInt("quit-time", 5);
         Location exitLoc = parseLocation(config.getString("exit-location"));
 
-        
         String title, subtitleTemplate;
         if (reason.equalsIgnoreCase("WIN")) {
             title = ChatColor.translateAlternateColorCodes('&', msgConfig.getString("dungeon.win.title", "&a&lCHIẾN THẮNG"));
@@ -1086,6 +1163,7 @@ public class DungeonManager {
             title = "§e§lTHÔNG BÁO";
             subtitleTemplate = "§fPhó bản kết thúc sau %time%s";
         }
+
         new BukkitRunnable() {
             int seconds = waitTime;
 
@@ -1094,10 +1172,9 @@ public class DungeonManager {
                 List<Player> players = new ArrayList<>(world.getPlayers());
 
                 if (seconds <= 0 || players.isEmpty()) {
-                    
+                    // 1. Teleport & cleanup player state TRƯỚC
                     for (Player p : players) {
                         removeTimeBar(p);
-                        fullCleanupDungeon(worldName);
                         p.setGameMode(GameMode.SURVIVAL);
                         p.teleport(exitLoc != null ? exitLoc : Bukkit.getWorlds().get(0).getSpawnLocation());
                         if (reason.equalsIgnoreCase("FAIL")) {
@@ -1105,23 +1182,34 @@ public class DungeonManager {
                         }
                     }
 
-                    
+                    // 2. Cleanup dungeon data
                     fullCleanupDungeon(worldName);
-                    
+
+                    // 3. Unload world (sync, main thread)
                     Bukkit.unloadWorld(world, false);
-                    forceDeleteWorld(worldName);
-                    fullCleanupDungeon(worldName);
+
+                    // 4. Xóa folder async, delay dài hơn để đảm bảo unload xong
+                    Bukkit.getScheduler().runTaskLaterAsynchronously(Main.getInstance(), () -> {
+                        File worldFolder = new File(Bukkit.getWorldContainer(), worldName);
+                        if (worldFolder.exists()) {
+                            try {
+                                deleteDirectory(worldFolder.toPath());
+                                Bukkit.getLogger().info("[Dungeon] Đã xóa world: " + worldName);
+                            } catch (Exception e) {
+                                Bukkit.getLogger().warning("Không thể xóa world " + worldName + ": " + e.getMessage());
+                            }
+                        }
+                    }, 100L); // tăng lên 5 giây cho chắc
+
                     cancel();
                     return;
                 }
 
-                
                 String currentSubtitle = subtitleTemplate.replace("%time%", String.valueOf(seconds));
                 for (Player p : players) {
                     p.sendTitle(title, currentSubtitle, 0, 25, 0);
                     p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1f, 1f);
                 }
-
                 seconds--;
             }
         }.runTaskTimer(Main.getInstance(), 0L, 20L);

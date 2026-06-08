@@ -103,3 +103,17 @@ difficulty-settings:
     damage-multiplier: 8.0
     speed-multiplier: 2.0  # Quái chạy nhanh gấp đôi
     display: "&4&lÁC MỘNG"
+tower-settings:
+  # Cấu hình theo tầng cụ thể: <tầng>: <giây_hồi>
+  # 86400 = 1 ngày, 2592000 = 30 ngày (1 tháng)
+  reset-times:
+    1: 2592000
+    2: 2592000
+    3: 2592000
+    4: 2592000
+    5: 2592000
+    6: 2592000
+    7: 86400
+    8: 86400
+    9: 86400
+    10: 86400

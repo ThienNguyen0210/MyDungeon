@@ -7,7 +7,7 @@ public class Party {
     private final List<UUID> members = new ArrayList<>();
     private final Set<UUID> readyPlayers = new HashSet<>();
     private final String name;
-
+    private int databaseId;
     public Party(UUID leader, String name) {
         this.leader = leader;
         this.name = name;
@@ -56,5 +56,12 @@ public class Party {
         
         if (members.isEmpty()) return false;
         return readyPlayers.size() >= members.size();
+    }
+    public int getDatabaseId() {
+        return databaseId;
+    }
+
+    public void setDatabaseId(int databaseId) {
+        this.databaseId = databaseId;
     }
 }

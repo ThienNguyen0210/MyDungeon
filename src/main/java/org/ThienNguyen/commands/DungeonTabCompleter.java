@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class DungeonTabCompleter implements TabCompleter {
-    List<String> subs = List.of("create", "start", "quit", "reload", "database", "edit", "save");
+    List<String> subs = List.of("create", "start", "quit", "reload", "database", "edit", "save", "reset");
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
         if (args.length == 1) {

@@ -22,7 +22,8 @@ public class DungeonCommand implements CommandExecutor {
         commands.put("reload", new ReloadDungeon()); 
         commands.put("database", new RequireCommand()); 
         commands.put("edit", new EditDungeon()); 
-        commands.put("save", new SaveDungeon()); 
+        commands.put("save", new SaveDungeon());
+        commands.put("reset", new ResetCooldown());
 
         
         

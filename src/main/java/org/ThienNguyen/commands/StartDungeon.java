@@ -23,7 +23,7 @@ public class StartDungeon implements SubCommand {
     public void execute(Player player, String[] args) {
         FileConfiguration msgConfig = Main.getInstance().getMessagesConfig();
 
-        
+
         if (args.length < 2) {
             player.sendMessage(ChatColor.translateAlternateColorCodes('&',
                     msgConfig.getString("dungeon.start.usage", "§cSử dụng: /dungeon start <id> [difficulty]")));
@@ -32,7 +32,7 @@ public class StartDungeon implements SubCommand {
 
         String id = args[1];
 
-        
+
         String selectedDifficulty = (args.length >= 3) ? args[2].toUpperCase() : null;
 
         File file = new File(Main.getInstance().getDataFolder(), "Dungeons/" + id + ".yml");
@@ -44,7 +44,7 @@ public class StartDungeon implements SubCommand {
 
         YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 
-        
+
         String difficulty;
         if (selectedDifficulty == null) {
             difficulty = config.getString("difficulty", "EASY").toUpperCase();
@@ -52,16 +52,16 @@ public class StartDungeon implements SubCommand {
             difficulty = selectedDifficulty;
         }
 
-        
+
         if (!Main.getInstance().getConfig().contains("difficulty-settings." + difficulty)) {
             player.sendMessage(ChatColor.translateAlternateColorCodes('&',
                     "§cĐộ khó §f" + difficulty + " §ckhông hợp lệ! Các mức: §eEASY§7, §aNORMAL§7, §cHARD§7, §4NIGHTMARE"));
             return;
         }
 
-        final String finalDifficulty = difficulty; 
+        final String finalDifficulty = difficulty;
 
-        
+
         String type = config.getString("Settings.Type", "SOLO").toUpperCase();
         int minPlayers = config.getInt("Settings.MinPlayers", 1);
         int maxPlayers = config.getInt("Settings.MaxPlayers", 4);
@@ -111,7 +111,7 @@ public class StartDungeon implements SubCommand {
         }
         else if (type.equals("BOTH")) {
             if (party != null) {
-                
+
                 if (!party.getLeader().equals(player.getUniqueId())) {
                     player.sendMessage(ChatColor.translateAlternateColorCodes('&',
                             msgConfig.getString("dungeon.start.not-leader", "§cChỉ trưởng nhóm mới có thể bắt đầu phó bản!")));
@@ -139,11 +139,19 @@ public class StartDungeon implements SubCommand {
                     participants.add(p);
                 }
             } else {
-                
+
                 participants.add(player);
             }
         }
-        
+        DungeonManager dm = Main.getInstance().getDungeonManager();
+        for (Player p : participants) {
+            if (!dm.canEnterTower(p, id)) {
+                if (participants.size() > 1) {
+                    player.sendMessage("§cThành viên §f" + p.getName() + " §cđã hết lượt tham gia hôm nay!");
+                }
+                return;
+            }
+        }
         List<String> conditions = config.getStringList("Conditions");
         if (!conditions.isEmpty()) {
             for (Player p : participants) {
@@ -151,13 +159,13 @@ public class StartDungeon implements SubCommand {
                     String msg = msgConfig.getString("dungeon.start.condition-failed", "§cNgười chơi %player% không đủ điều kiện để vào phó bản!");
                     player.sendMessage(ChatColor.translateAlternateColorCodes('&',
                             msg.replace("%player%", p.getName())));
-                    return; 
+                    return;
                 }
             }
         }
-        DungeonManager dm = Main.getInstance().getDungeonManager();
 
-        
+
+
         for (Player p : participants) {
             if (dm.getPlayerState(p) != DungeonManager.DungeonState.NONE) {
                 String msg = msgConfig.getString("dungeon.start.already-in-dungeon", "§c%player% đang trong phó bản khác!");
@@ -167,7 +175,7 @@ public class StartDungeon implements SubCommand {
             }
         }
 
-        
+
         List<String> requireList = config.getStringList("requires");
         if (!requireList.isEmpty()) {
             Map<Integer, Integer> neededItems = new HashMap<>();
@@ -194,14 +202,19 @@ public class StartDungeon implements SubCommand {
                 }
             }
 
-            
+
             for (Map.Entry<Integer, Integer> entry : neededItems.entrySet()) {
                 ItemStack template = dm.getRequireItems().get(entry.getKey());
                 if (template != null) removeItems(player, template, entry.getValue());
             }
         }
 
-        
+        if (config.getBoolean("is-tower-stage", false)) {
+            int stageNum = config.getInt("stage-number", 0);
+            for (Player p : participants) {
+                Main.getInstance().getDatabase().setLastWin(p.getUniqueId(), stageNum, System.currentTimeMillis());
+            }
+        }
         String templateWorldName = config.getString("world-template");
         if (templateWorldName == null) {
             player.sendMessage(ChatColor.translateAlternateColorCodes('&',
@@ -220,7 +233,7 @@ public class StartDungeon implements SubCommand {
         String timestamp = String.valueOf(System.currentTimeMillis());
         String tempWorldName = "temp_" + id + "_" + player.getName() + "_" + timestamp;
 
-        
+
         for (Player p : participants) {
             dm.setPlayerState(p, DungeonManager.DungeonState.ACTIVE);
         }
@@ -231,7 +244,7 @@ public class StartDungeon implements SubCommand {
 
         final World[] loadedWorld = new World[1];
 
-        
+
         Bukkit.getScheduler().runTaskAsynchronously(Main.getInstance(), () -> {
             try {
                 File targetFolder = new File(Bukkit.getWorldContainer(), tempWorldName);
@@ -261,7 +274,7 @@ public class StartDungeon implements SubCommand {
             }
         });
 
-        
+
         new BukkitRunnable() {
             int totalTicks = countdownSeconds * 20;
             int currentTick = 0;
@@ -289,10 +302,10 @@ public class StartDungeon implements SubCommand {
                     World tempWorld = loadedWorld[0];
                     String worldName = tempWorld.getName();
 
-                    
+
                     dm.setWorldDifficulty(worldName, finalDifficulty);
 
-                    
+
                     String diffDisplay = Main.getInstance().getConfig()
                             .getString("difficulty-settings." + finalDifficulty + ".display", finalDifficulty);
                     dm.setDungeonLeader(worldName, player.getUniqueId());
