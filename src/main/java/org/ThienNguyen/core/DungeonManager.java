@@ -24,7 +24,7 @@ import java.util.stream.Stream;
 
 public class DungeonManager {
     private final Map<String, BukkitRunnable> stageGuardTasks = new HashMap<>();
-    private final Map<String, Location> stageSpawnLocations = new HashMap<>(); 
+    private final Map<String, Location> stageSpawnLocations = new HashMap<>();
     private final Map<String, BukkitRunnable> activeTimerTasks = new HashMap<>();
     public enum DungeonState { NONE, ACTIVE, END }
     private final Map<UUID, Double> playerDamageDealt = new HashMap<>();
@@ -32,7 +32,7 @@ public class DungeonManager {
     private final File timerFile = new File(Main.getInstance().getDataFolder(), "dungeon-timers.yml");
     private YamlConfiguration timerConfig;
     private final Map<UUID, DungeonState> playerState = new HashMap<>();
-    private final Map<String, Long> dungeonEndTime = new HashMap<>(); 
+    private final Map<String, Long> dungeonEndTime = new HashMap<>();
     private final Map<UUID, Integer> deathCount = new HashMap<>();
     private final Map<UUID, BossBar> timeBars = new HashMap<>();
     private final Map<UUID, Integer> currentStageIndex = new HashMap<>();
@@ -44,7 +44,7 @@ public class DungeonManager {
     private final Map<String, UUID> dungeonLeader = new HashMap<>();
     private final Map<String, Integer> maxLivesCache = new HashMap<>();
     private final Map<String, Set<UUID>> dungeonPartyMembers = new HashMap<>();
-    private final Map<String, Long> dungeonLastActive = new HashMap<>(); 
+    private final Map<String, Long> dungeonLastActive = new HashMap<>();
     private final Map<Integer, ItemStack> requireItems = new HashMap<>();
     private final File requireFile;
     private final Map<String, String> worldDifficulty = new HashMap<>();
@@ -65,7 +65,7 @@ public class DungeonManager {
                 requireFile.createNewFile();
             } catch (IOException e) { e.printStackTrace(); }
         }
-        Main.getInstance().saveDefaultConfig(); 
+        Main.getInstance().saveDefaultConfig();
         this.config = Main.getInstance().getConfig();
         this.requireConfig = YamlConfiguration.loadConfiguration(requireFile);
         loadRequireItems();
@@ -73,7 +73,7 @@ public class DungeonManager {
     public FileConfiguration getPluginConfig() {
         return config;
     }
-    
+
     public void addPlayerToDungeon(String worldName, UUID uuid) {
         dungeonPlayers.computeIfAbsent(worldName, k -> new HashSet<>()).add(uuid);
     }
@@ -97,7 +97,7 @@ public class DungeonManager {
     }
 
 
-    
+
     public DungeonState getPlayerState(Player player) {
         return playerState.getOrDefault(player.getUniqueId(), DungeonState.NONE);
     }
@@ -147,9 +147,9 @@ public class DungeonManager {
         }
     }
 
-    
-    
-    
+
+
+
 
     public DungeonStage getCurrentStage(Player player, String dungeonId) {
         File file = new File(Main.getInstance().getDataFolder(), "Dungeons/" + dungeonId + ".yml");
@@ -163,14 +163,14 @@ public class DungeonManager {
 
         List<DungeonStage.MobTarget> multiTargets = new ArrayList<>();
         int totalGoal = 0;
-        String representativeTarget = config.getString(path + ".target"); 
+        String representativeTarget = config.getString(path + ".target");
 
-        
+
         if (config.contains(path + ".targets")) {
             List<?> list = config.getList(path + ".targets");
             for (Object obj : list) {
                 if (obj instanceof Map<?, ?> map) {
-                    
+
                     String mobId = map.containsKey("mob") ? String.valueOf(map.get("mob")) : null;
                     String loc = map.containsKey("location") ? String.valueOf(map.get("location")) : null;
                     int mGoal = map.get("goal") instanceof Integer ? (int) map.get("goal") : 1;
@@ -178,7 +178,7 @@ public class DungeonManager {
                     multiTargets.add(new DungeonStage.MobTarget(mobId, loc, mGoal));
                     totalGoal += mGoal;
 
-                    
+
                     if (representativeTarget == null) {
                         representativeTarget = (mobId != null) ? mobId : loc;
                     }
@@ -186,17 +186,17 @@ public class DungeonManager {
             }
         }
 
-        
+
         if (totalGoal == 0) {
             totalGoal = config.getInt(path + ".goal", 1);
         }
 
-        
+
         return new DungeonStage(
                 config.getString(path + ".type"),
                 representativeTarget,
                 totalGoal,
-                config.getString(path + ".name", ""), 
+                config.getString(path + ".name", ""),
                 config.getString(path + ".message", ""),
                 config.getString(path + ".location", null),
                 config.getDouble(path + ".distance", 4.0),
@@ -235,7 +235,7 @@ public class DungeonManager {
         if (stage != null) {
             String path = "stages.1";
 
-            
+
             if (config.getBoolean(path + ".set-checkpoint", false)) {
                 Location cpLoc = null;
                 if (stage.getTarget() != null) {
@@ -255,7 +255,7 @@ public class DungeonManager {
                 }
             }
 
-            
+
             String title = config.getString(path + ".title");
             String subtitle = config.getString(path + ".subtitle", config.getString(path + ".message", ""));
 
@@ -267,7 +267,7 @@ public class DungeonManager {
                 );
             }
 
-            
+
             if (stage.getType().equalsIgnoreCase("KILL_MYTHIC_MOB")) {
                 int delaySeconds = config.getInt(path + ".delay", 0);
 
@@ -306,7 +306,7 @@ public class DungeonManager {
             float yaw = 0;
             float pitch = 0;
 
-            
+
             if (parts.length > idx + 3) {
                 yaw = Float.parseFloat(parts[idx + 3].trim());
             }
@@ -316,13 +316,13 @@ public class DungeonManager {
 
             return new Location(world, x, y, z, yaw, pitch);
         } catch (Exception e) {
-            
+
             org.bukkit.Bukkit.getLogger().warning("[Dungeon] Loi parseLocationSimple tai: " + str);
             return null;
         }
     }
     public void nextStage(Player player) {
-        
+
         if (getPlayerState(player) == DungeonState.END) {
             return;
         }
@@ -331,25 +331,25 @@ public class DungeonManager {
         if (!worldName.startsWith("temp_")) return;
         String dungeonId = worldName.split("_")[1];
 
-        
+
         int currentIndex = getCurrentStageIndex(player);
         File dungeonFile = new File(Main.getInstance().getDataFolder(), "Dungeons/" + dungeonId + ".yml");
         YamlConfiguration config = YamlConfiguration.loadConfiguration(dungeonFile);
 
-        
-        
+
+
         String rewardPath = "stages." + currentIndex + ".reward-item-id";
         if (config.contains(rewardPath)) {
             int itemId = config.getInt(rewardPath);
-            ItemStack reward = getRequireItems().get(itemId); 
+            ItemStack reward = getRequireItems().get(itemId);
 
             if (reward != null) {
                 for (Player p : player.getWorld().getPlayers()) {
-                    
+
                     if (getPlayerState(p) != DungeonState.END) {
                         p.getInventory().addItem(reward.clone());
 
-                        
+
                         String rewardMsg = Main.getInstance().getMessagesConfig()
                                 .getString("dungeon.stage.reward-received", "&a&l[!] &fBạn đã nhận được phần thưởng hoàn thành Stage!");
                         p.sendMessage(ChatColor.translateAlternateColorCodes('&', rewardMsg));
@@ -358,7 +358,7 @@ public class DungeonManager {
             }
         }
 
-        
+
         int nextIndex = currentIndex + 1;
         setCurrentStageIndex(player, nextIndex);
 
@@ -368,13 +368,13 @@ public class DungeonManager {
         DungeonStage next = getCurrentStage(player, dungeonId);
 
         if (next != null) {
-            
+
             String msg = next.getMessage();
             if (msg != null && !msg.isEmpty()) {
                 player.sendMessage(ChatColor.translateAlternateColorCodes('&', msg));
             }
 
-            
+
             if (next.getType().equalsIgnoreCase("KILL_MYTHIC_MOB")) {
                 int delaySeconds = config.getInt("stages." + nextIndex + ".delay", 0);
 
@@ -394,32 +394,32 @@ public class DungeonManager {
                 }
             }
         } else {
-            
+
             winDungeon(player);
         }
     }
     public boolean canEnterTower(Player player, String dungeonId) {
-        
+
         FileConfiguration dCfg = getDungeonConfig(dungeonId);
 
-        
+
         if (dCfg == null || !dCfg.getBoolean("is-tower-stage", false)) {
             return true;
         }
 
-        
+
         int stageNum = dCfg.getInt("stage-number", 0);
         long lastWin = Main.getInstance().getDatabase().getLastWin(player.getUniqueId(), stageNum);
 
-        
+
         int cooldownSeconds = Main.getInstance().getConfig().getInt("tower-settings.reset-times." + stageNum, 86400);
         long currentTime = System.currentTimeMillis();
 
-        
+
         if (currentTime - lastWin < cooldownSeconds * 1000L) {
             long secondsLeft = (cooldownSeconds * 1000L - (currentTime - lastWin)) / 1000;
 
-            
+
             player.sendMessage("§c[!] Bạn phải chờ §e" + formatDetailedTime((int)secondsLeft) + " §cđể đánh lại tầng này.");
             return false;
         }
@@ -439,13 +439,13 @@ public class DungeonManager {
         if (days > 0) {
             sb.append(days).append(" ngày ");
         }
-        if (hours > 0 || days > 0) { 
+        if (hours > 0 || days > 0) {
             sb.append(hours).append(" giờ ");
         }
         if (minutes > 0 || hours > 0 || days > 0) {
             sb.append(minutes).append(" phút ");
         }
-        if (sb.length() == 0) { 
+        if (sb.length() == 0) {
             sb.append(seconds).append(" giây");
         }
 
@@ -458,15 +458,15 @@ public class DungeonManager {
         String worldName = world.getName();
         if (!worldName.startsWith("temp_")) return;
 
-        
-        
+
+
         if (getPlayerState(player) == DungeonState.END) return;
 
-        
+
         List<Player> playersInWorld = new ArrayList<>(world.getPlayers());
         for (Player p : playersInWorld) {
             setPlayerState(p, DungeonState.END);
-            removeTimeBar(p); 
+            removeTimeBar(p);
         }
 
         String dungeonId = worldName.split("_")[1];
@@ -475,12 +475,12 @@ public class DungeonManager {
 
         String currentDifficulty = getWorldDifficulty(worldName).toUpperCase();
 
-        
+
         if (config.getBoolean("send-damage-summary", false)) {
             sendDamageSummary(worldName);
         }
 
-        
+
         if (config.getBoolean("damage-rewards.enabled", false)) {
             List<String> tiers = config.getStringList("damage-rewards.tiers." + currentDifficulty);
             if (tiers == null || tiers.isEmpty()) {
@@ -494,7 +494,7 @@ public class DungeonManager {
             }
         }
 
-        
+
         List<String> winCommands = config.getStringList("win-commands");
         int quitTimeSeconds = config.getInt("quit-time", 5);
 
@@ -505,11 +505,11 @@ public class DungeonManager {
 
             p.playSound(p.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1f, 1f);
 
-            
+
         }
 
 
-        
+
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -526,7 +526,7 @@ public class DungeonManager {
 
         String worldName = world.getName();
 
-        
+
         int currentIndex = getCurrentStageIndex(player);
         String spawnKey = worldName + ":spawned_stage:" + currentIndex;
 
@@ -535,7 +535,7 @@ public class DungeonManager {
         }
         worldProgress.put(spawnKey, 1);
 
-        
+
         FileConfiguration cfg = getPluginConfig();
         String mode = cfg.getString("mob-spawn-animation.mode", "instant").toLowerCase();
         long delayTicks = cfg.getLong("mob-spawn-animation.delay-ticks", 20L);
@@ -545,7 +545,7 @@ public class DungeonManager {
         boolean useParticle = cfg.getBoolean("mob-spawn-animation.spawn-particle.enabled", true);
         boolean useSound = cfg.getBoolean("mob-spawn-animation.spawn-sound.enabled", true);
 
-        
+
         if (stage.getMultiTargets() != null && !stage.getMultiTargets().isEmpty()) {
             for (DungeonStage.MobTarget mt : stage.getMultiTargets()) {
                 Location baseLoc = parseLocationInWorld(world, mt.getSpawnLocation());
@@ -561,7 +561,7 @@ public class DungeonManager {
                 );
             }
         }
-        
+
         else {
             Location baseLoc = parseLocationInWorld(world, stage.getLocation());
             if (baseLoc == null) return;
@@ -593,7 +593,7 @@ public class DungeonManager {
             return;
         }
 
-        
+
         new BukkitRunnable() {
             int spawned = 0;
 
@@ -607,7 +607,7 @@ public class DungeonManager {
                 int thisBatch = Math.min(batchSize, totalAmount - spawned);
 
                 for (int i = 0; i < thisBatch; i++) {
-                    
+
                     Location spawnLoc = findSafeAirSpawnLocation(baseLoc, randomRadius);
 
                     spawnSingleMythicMob(mobId, spawnLoc, stage, useParticle, useSound);
@@ -628,7 +628,7 @@ public class DungeonManager {
 
         World world = center.getWorld();
         Location attempt = center.clone();
-        int maxAttempts = 35;  
+        int maxAttempts = 35;
 
         for (int attemptNum = 0; attemptNum < maxAttempts; attemptNum++) {
             double angle = Math.random() * 2 * Math.PI;
@@ -637,53 +637,53 @@ public class DungeonManager {
             attempt.setX(center.getX() + Math.cos(angle) * dist);
             attempt.setZ(center.getZ() + Math.sin(angle) * dist);
 
-            
-            double baseY = center.getY();  
-            double yOffset = -1.0 + Math.random() * 3.0;  
+
+            double baseY = center.getY();
+            double yOffset = -1.0 + Math.random() * 3.0;
             attempt.setY(baseY + yOffset);
 
             Block feetBlock = attempt.getBlock();
-            Block headBlock = attempt.clone().add(0, 1.8, 0).getBlock();  
+            Block headBlock = attempt.clone().add(0, 1.8, 0).getBlock();
 
-            
+
             boolean isAirSafe = feetBlock.getType().isAir() && headBlock.getType().isAir() &&
                     !feetBlock.isLiquid() && feetBlock.getType() != Material.LAVA &&
                     headBlock.getType() != Material.LAVA;
 
-            
+
             Block below = attempt.clone().subtract(0, 0.1, 0).getBlock();
             boolean hasGroundSupport = !below.getType().isAir() && !below.isLiquid();
 
             if (isAirSafe && hasGroundSupport) {
-                return attempt;  
+                return attempt;
             }
         }
 
-        
+
         return center.clone();
     }
     private void spawnSingleMythicMob(String mobId, Location loc, DungeonStage stage,
                                       boolean useParticle, boolean useSound) {
         if (mobId == null || loc == null) return;
 
-        
-        
+
+
 
         ActiveMob am = MythicBukkit.inst().getMobManager().spawnMob(mobId, loc);
         if (am == null || am.getEntity() == null) return;
 
-        
+
         if (am.getEntity().getBukkitEntity() instanceof org.bukkit.entity.LivingEntity entity) {
 
-            
-            
+
+
             applyDifficultyToEntity(entity);
-            
+
 
             Location actualLoc = entity.getLocation();
             FileConfiguration cfg = getPluginConfig();
 
-            
+
             if (useParticle) {
                 try {
                     String particleName = cfg.getString("mob-spawn-animation.spawn-particle.type", "SMOKE_NORMAL");
@@ -700,7 +700,7 @@ public class DungeonManager {
                 } catch (Exception ignored) {}
             }
 
-            
+
             if (useSound) {
                 try {
                     String soundName = cfg.getString("mob-spawn-animation.spawn-sound.sound", "ENTITY_ZOMBIE_INFECT");
@@ -714,7 +714,7 @@ public class DungeonManager {
                 } catch (Exception ignored) {}
             }
 
-            
+
             if (stage.isAiEnabled()) {
                 startReturnToHomeTask(am, actualLoc, stage);
             }
@@ -733,23 +733,23 @@ public class DungeonManager {
         double dmgMulti = mainConfig.getDouble(path + "damage-multiplier", 1.0);
         double speedMulti = mainConfig.getDouble(path + "speed-multiplier", 1.0);
 
-        
+
         Bukkit.getScheduler().runTaskLater(Main.getInstance(), () -> {
             if (entity.isDead()) return;
 
-            
+
             if (dmgMulti != 1.0) {
                 var attack = entity.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE);
                 if (attack != null) attack.setBaseValue(attack.getBaseValue() * dmgMulti);
             }
 
-            
+
             if (speedMulti != 1.0) {
                 var speed = entity.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED);
                 if (speed != null) speed.setBaseValue(speed.getBaseValue() * speedMulti);
             }
 
-            
+
             if (hpMulti != 1.0) {
                 var maxHp = entity.getAttribute(Attribute.GENERIC_MAX_HEALTH);
                 if (maxHp != null) {
@@ -758,7 +758,7 @@ public class DungeonManager {
                     entity.setHealth(newValue);
                 }
             }
-        }, 1L); 
+        }, 1L);
     }
 
     public Location parseLocationInWorld(World world, String str) {
@@ -776,30 +776,30 @@ public class DungeonManager {
         }
     }
     public int getMaxLives(String dungeonId) {
-        
+
         if (maxLivesCache.containsKey(dungeonId)) {
             return maxLivesCache.get(dungeonId);
         }
 
-        
+
         File dungeonFile = new File(Main.getInstance().getDataFolder(), "Dungeons/" + dungeonId + ".yml");
         if (!dungeonFile.exists()) {
-            return 3; 
+            return 3;
         }
 
         YamlConfiguration config = YamlConfiguration.loadConfiguration(dungeonFile);
 
-        
+
         int maxLives = config.getInt("max-lives", 3);
 
-        
+
         maxLivesCache.put(dungeonId, maxLives);
 
         return maxLives;
     }
-    
-    
-    
+
+
+
 
 
     public void failDungeon(Player player) {
@@ -808,26 +808,26 @@ public class DungeonManager {
         if (!worldName.startsWith("temp_")) return;
 
 
-        
 
-        
+
+
         for (Player p : world.getPlayers()) {
             p.setGameMode(GameMode.SPECTATOR);
             p.playSound(p.getLocation(), Sound.ENTITY_VILLAGER_NO, 1f, 1f);
         }
 
-        
+
         fullCleanupDungeon(worldName);
         shutdownDungeon(worldName, "FAIL");
     }
 
-    
-    
-    
+
+
+
     public boolean isAnyMemberAlive(World world) {
         if (world == null) return false;
         for (Player p : world.getPlayers()) {
-            
+
             if (p.getGameMode() != GameMode.SPECTATOR) {
                 return true;
             }
@@ -898,6 +898,73 @@ public class DungeonManager {
         }
     }
 
+    /**
+     * Tìm tất cả thư mục có thể chứa world tên `worldName`.
+     * Một số plugin quản lý world (WorldGuard, Multiverse...) lưu world bên
+     * trong plugins/<Plugin>/worlds/ thay vì thư mục gốc server, nên không thể
+     * chỉ tin vào Bukkit.getWorldContainer(). Hàm này quét tất cả nơi khả nghi
+     * và trả về danh sách những thư mục thực sự tồn tại trên đĩa.
+     */
+    private List<File> findAllWorldFolders(String worldName) {
+        List<File> candidates = new ArrayList<>();
+
+        // 1. Thư mục gốc server (chỗ mặc định Bukkit hay dùng)
+        candidates.add(new File(Bukkit.getWorldContainer(), worldName));
+
+        // 2. plugins/WorldGuard/worlds/<worldName>
+        File pluginsFolder = Main.getInstance().getDataFolder().getParentFile();
+        candidates.add(new File(pluginsFolder, "WorldGuard/worlds/" + worldName));
+
+        // 3. Phòng trường hợp world đang load thật sự nằm ở nơi khác hẳn
+        //    (ví dụ multiverse custom path) - lấy luôn từ World object nếu còn tồn tại
+        World loadedWorld = Bukkit.getWorld(worldName);
+        if (loadedWorld != null) {
+            candidates.add(loadedWorld.getWorldFolder());
+        }
+
+        List<File> found = new ArrayList<>();
+        Set<String> seenPaths = new HashSet<>();
+        for (File f : candidates) {
+            try {
+                String canonical = f.getCanonicalPath();
+                if (f.exists() && seenPaths.add(canonical)) {
+                    found.add(f);
+                }
+            } catch (IOException e) {
+                if (f.exists() && seenPaths.add(f.getAbsolutePath())) {
+                    found.add(f);
+                }
+            }
+        }
+        return found;
+    }
+
+    /**
+     * Xóa world ở mọi nơi tìm thấy (server root, plugins/WorldGuard/worlds/, v.v.)
+     * Trả về số thư mục đã xóa thành công.
+     */
+    private int deleteWorldEverywhere(String worldName) {
+        List<File> folders = findAllWorldFolders(worldName);
+        int deletedCount = 0;
+
+        if (folders.isEmpty()) {
+            Bukkit.getLogger().warning("[Dungeon] Không tìm thấy thư mục world nào để xóa cho: " + worldName);
+            return 0;
+        }
+
+        for (File folder : folders) {
+            try {
+                deleteDirectory(folder.toPath());
+                Bukkit.getLogger().info("[Dungeon] Đã xóa world: " + worldName + " tại " + folder.getAbsolutePath());
+                deletedCount++;
+            } catch (Exception e) {
+                Bukkit.getLogger().warning("[Dungeon] Không thể xóa world " + worldName + " tại "
+                        + folder.getAbsolutePath() + ": " + e.getMessage());
+            }
+        }
+        return deletedCount;
+    }
+
 
     public void startTimeLimit(String worldName, int seconds) {
         if (activeTimerTasks.containsKey(worldName)) return;
@@ -905,7 +972,7 @@ public class DungeonManager {
         long startTime;
         long durationMs;
 
-        
+
         if (timerConfig.contains("timers." + worldName)) {
             startTime = timerConfig.getLong("timers." + worldName + ".startTime");
             durationMs = timerConfig.getLong("timers." + worldName + ".durationMs");
@@ -929,7 +996,7 @@ public class DungeonManager {
                 long remainingMs = getRemainingTime(worldName);
                 World world = Bukkit.getWorld(worldName);
 
-                
+
                 if (remainingMs <= 0) {
                     if (!isEnding) {
                         isEnding = true;
@@ -993,9 +1060,9 @@ public class DungeonManager {
                     return;
                 }
 
-                
+
                 if (world != null && !world.getPlayers().isEmpty()) {
-                    
+
                     boolean showBar = Main.getInstance().getConfig().getBoolean("dungeon-settings.show-time-bossbar", true);
 
                     int remainingSec = (int) (remainingMs / 1000);
@@ -1015,7 +1082,7 @@ public class DungeonManager {
                                     Main.getInstance().getMessagesConfig().getString("dungeon.time-limit-bossbar", "&fThời gian: &e%time%"));
                             bar.setTitle(barTemplate.replace("%time%", formatTime(remainingSec)));
                         } else {
-                            
+
                             removeTimeBar(p);
                         }
                     }
@@ -1025,26 +1092,26 @@ public class DungeonManager {
         task.runTaskTimer(Main.getInstance(), 0L, 20L);
         activeTimerTasks.put(worldName, task);
     }
-    
+
     public void spawnStageMobWithDelay(Player player, DungeonStage stage, String dungeonId, int stageIndex) {
         if (player == null || stage == null) return;
 
-        
+
         File file = new File(Main.getInstance().getDataFolder(), "Dungeons/" + dungeonId + ".yml");
         YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 
-        
+
         int delaySeconds = config.getInt("stages." + stageIndex + ".delay", 0);
 
         if (delaySeconds > 0) {
-            
+
             String delayMsg = Main.getInstance().getMessagesConfig()
                     .getString("dungeon.stage.waiting-next", "&e&l[!] &fĐợt quái tiếp theo sẽ xuất hiện sau &b%time%s&f.")
                     .replace("%time%", String.valueOf(delaySeconds));
 
             player.getWorld().getPlayers().forEach(p -> p.sendMessage(ChatColor.translateAlternateColorCodes('&', delayMsg)));
 
-            
+
             new BukkitRunnable() {
                 @Override
                 public void run() {
@@ -1052,27 +1119,19 @@ public class DungeonManager {
                 }
             }.runTaskLater(Main.getInstance(), delaySeconds * 20L);
         } else {
-            
+
             spawnStageMob(player, stage);
         }
     }
-    
+
     private void forceDeleteWorld(String worldName) {
         Bukkit.getScheduler().runTaskLaterAsynchronously(Main.getInstance(), () -> {
-            File worldFolder = new File(Bukkit.getWorldContainer(), worldName);
-            if (worldFolder.exists()) {
-                try {
-                    deleteDirectory(worldFolder.toPath());
-                    Bukkit.getLogger().info("§a[Dungeon] Đã xóa world phó bản quá hạn: " + worldName);
-                } catch (Exception e) {
-                    Bukkit.getLogger().warning("Khong the xoa world " + worldName + ": " + e.getMessage());
-                }
-            }
-        }, 40L); 
+            deleteWorldEverywhere(worldName);
+        }, 40L);
     }
 
 
-    
+
     public BossBar createNewTimeBar(String worldName, int remainingSec) {
         FileConfiguration msg = Main.getInstance().getMessagesConfig();
         String barTemplate = ChatColor.translateAlternateColorCodes('&', msg.getString("dungeon.time-limit-bossbar", "&fThời gian: &e%time%"));
@@ -1116,21 +1175,21 @@ public class DungeonManager {
         worldProgress.put(worldName, progress);
     }
     public boolean isLastStage(Player player, String dungeonId) {
-        
+
         int currentStageIndex = getCurrentStageIndex(player);
 
-        
+
         File file = new File(Main.getInstance().getDataFolder(), "Dungeons/" + dungeonId + ".yml");
         YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 
         if (config.getConfigurationSection("stages") == null) return false;
         int totalStages = config.getConfigurationSection("stages").getKeys(false).size();
 
-        
+
         return currentStageIndex >= totalStages;
     }
     public FileConfiguration getDungeonConfig(String dungeonId) {
-        
+
         File file = new File(Main.getInstance().getDataFolder(), "Dungeons/" + dungeonId + ".yml");
         if (!file.exists()) return null;
         return YamlConfiguration.loadConfiguration(file);
@@ -1140,7 +1199,7 @@ public class DungeonManager {
         Main.getInstance().getBaseManager().cleanup(worldName);
         World world = Bukkit.getWorld(worldName);
         if (world == null) {
-            forceDeleteWorld(worldName); 
+            forceDeleteWorld(worldName);
             return;
         }
 
@@ -1172,7 +1231,7 @@ public class DungeonManager {
                 List<Player> players = new ArrayList<>(world.getPlayers());
 
                 if (seconds <= 0 || players.isEmpty()) {
-                    
+
                     for (Player p : players) {
                         removeTimeBar(p);
                         p.setGameMode(GameMode.SURVIVAL);
@@ -1182,24 +1241,16 @@ public class DungeonManager {
                         }
                     }
 
-                    
+
                     fullCleanupDungeon(worldName);
 
-                    
+
                     Bukkit.unloadWorld(world, false);
 
-                    
+
                     Bukkit.getScheduler().runTaskLaterAsynchronously(Main.getInstance(), () -> {
-                        File worldFolder = new File(Bukkit.getWorldContainer(), worldName);
-                        if (worldFolder.exists()) {
-                            try {
-                                deleteDirectory(worldFolder.toPath());
-                                Bukkit.getLogger().info("[Dungeon] Đã xóa world: " + worldName);
-                            } catch (Exception e) {
-                                Bukkit.getLogger().warning("Không thể xóa world " + worldName + ": " + e.getMessage());
-                            }
-                        }
-                    }, 100L); 
+                        deleteWorldEverywhere(worldName);
+                    }, 100L);
 
                     cancel();
                     return;
@@ -1232,13 +1283,13 @@ public class DungeonManager {
                 BaseManager baseManager = Main.getInstance().getBaseManager();
                 boolean isDefendMode = baseManager.isBaseEnabled(worldName);
 
-                
+
                 Location targetLoc;
                 if (isDefendMode) {
-                    
+
                     targetLoc = baseManager.getBaseLocation(worldName);
                 } else {
-                    
+
                     String aiTargetStr = stage.getAiTarget();
                     if (aiTargetStr != null && !aiTargetStr.isEmpty()) {
                         targetLoc = parseLocationInWorld(mob.getWorld(), aiTargetStr);
@@ -1253,24 +1304,24 @@ public class DungeonManager {
 
                 double distanceToTargetSq = mob.getLocation().distanceSquared(targetLoc);
 
-                
+
                 if (isDefendMode && distanceToTargetSq <= 64) {
                     if (mob.getTarget() != null) mob.setTarget(null);
 
                     if (!baseManager.isInZone(worldName, mob.getLocation())) {
                         mob.getPathfinder().moveTo(targetLoc, 1.2);
                     } else {
-                        
+
                         mob.swingMainHand();
 
-                        
-                        
+
+
                         double realDamage = am.getDamage();
 
-                        
-                        
 
-                        
+
+
+
                         baseManager.damageBase(worldName, realDamage);
 
                         mob.getWorld().spawnParticle(Particle.CRIT, mob.getLocation().add(0, 1.5, 0), 5, 0.3, 0.3, 0.3, 0.1);
@@ -1278,13 +1329,13 @@ public class DungeonManager {
                     return;
                 }
 
-                
+
                 boolean hasPlayerNearby = mob.getWorld().getPlayers().stream()
                         .anyMatch(p -> p.getLocation().distanceSquared(mob.getLocation()) <= 144
                                 && p.getGameMode() == org.bukkit.GameMode.SURVIVAL);
 
                 if (!hasPlayerNearby) {
-                    
+
                     if (distanceToTargetSq > 16) {
                         mob.setTarget(null);
                         mob.getPathfinder().moveTo(targetLoc, 1.0);
@@ -1293,14 +1344,14 @@ public class DungeonManager {
             }
         }.runTaskTimer(Main.getInstance(), 0L, 40L);
     }
-    
+
     public void startStageMobGuardian(String worldName, DungeonStage stage, String dungeonId) {
-        
+
         if (stageGuardTasks.containsKey(worldName)) {
             stageGuardTasks.get(worldName).cancel();
         }
 
-        
+
         Location spawnLoc = null;
         if (stage.getMultiTargets() != null && !stage.getMultiTargets().isEmpty()) {
             spawnLoc = parseLocationInWorld(Bukkit.getWorld(worldName), stage.getMultiTargets().get(0).getSpawnLocation());
@@ -1318,16 +1369,16 @@ public class DungeonManager {
                     return;
                 }
 
-                
+
                 if (world.getPlayers().stream().noneMatch(p -> getPlayerState(p) != DungeonState.END)) {
                     cancelGuard(worldName);
                     return;
                 }
 
-                String mobId = stage.getTarget(); 
+                String mobId = stage.getTarget();
                 if (mobId == null || mobId.isEmpty()) return;
 
-                
+
                 boolean hasAliveMob = world.getEntities().stream()
                         .filter(e -> e instanceof org.bukkit.entity.LivingEntity)
                         .anyMatch(e -> {
@@ -1338,16 +1389,16 @@ public class DungeonManager {
                 if (!hasAliveMob) {
                     Location respawnLoc = stageSpawnLocations.getOrDefault(worldName, world.getSpawnLocation());
 
-                    spawnSingleMythicMob(mobId, respawnLoc.clone(), stage, false, false); 
+                    spawnSingleMythicMob(mobId, respawnLoc.clone(), stage, false, false);
 
-                    
+
                     String msg = "&c&l[⚠] &fMob đã bị mất (despawn). Đã respawn lại!";
                     world.getPlayers().forEach(p -> p.sendMessage(ChatColor.translateAlternateColorCodes('&', msg)));
                 }
             }
         };
 
-        guardian.runTaskTimer(Main.getInstance(), 200L, 200L); 
+        guardian.runTaskTimer(Main.getInstance(), 200L, 200L);
         stageGuardTasks.put(worldName, guardian);
     }
 
@@ -1357,7 +1408,7 @@ public class DungeonManager {
         stageSpawnLocations.remove(worldName);
     }
     public void fullCleanupDungeon(String worldName) {
-        
+
         dungeonLeader.remove(worldName);
         worldDifficulty.remove(worldName);
         dungeonPartyMembers.remove(worldName);
@@ -1365,25 +1416,25 @@ public class DungeonManager {
         dungeonLastActive.remove(worldName);
         worldProgress.keySet().removeIf(key -> key.startsWith(worldName));
         cancelGuard(worldName);
-        
+
         org.bukkit.World world = org.bukkit.Bukkit.getWorld(worldName);
         if (world != null) {
             for (org.bukkit.entity.Player p : world.getPlayers()) {
                 java.util.UUID uuid = p.getUniqueId();
 
-                
+
                 org.ThienNguyen.core.DungeonScoreboard.removeScoreboard(p);
-                
+
                 playerDamageDealt.remove(uuid);
                 deathCount.remove(uuid);
                 currentStageIndex.remove(uuid);
                 stageProgress.remove(uuid);
-                playerState.remove(uuid); 
-                removeTimeBar(p); 
+                playerState.remove(uuid);
+                removeTimeBar(p);
             }
         }
 
-        
+
         timerConfig.set("timers." + worldName, null);
         saveTimerConfig();
 
@@ -1394,33 +1445,33 @@ public class DungeonManager {
         autoNextTasks.remove(worldName);
     }
     public String getTimeLeft(String worldName) {
-        
+
         long remainingMs = getRemainingTime(worldName);
 
-        
+
         if (remainingMs <= 0) {
             return "";
         }
 
-        
+
         int remainingSec = (int) (remainingMs / 1000);
 
-        
-        
+
+
         return formatTime(remainingSec);
     }
     /**
      * Kích hoạt phá hủy một nhóm block theo ID với Delay
      */
     public void triggerBreakGroup(String worldName, String dungeonId, String groupId, int delayTicks) {
-        
+
         File file = new File(Main.getInstance().getDataFolder(), "Dungeons/" + dungeonId + ".yml");
         YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
         List<String> locStrings = config.getStringList("break-groups." + groupId);
 
         if (locStrings.isEmpty()) return;
 
-        
+
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -1439,7 +1490,7 @@ public class DungeonManager {
 
                         Block block = loc.getBlock();
                         if (block.getType() != Material.AIR) {
-                            
+
                             world.spawnParticle(Particle.BLOCK, loc.clone().add(0.5, 0.5, 0.5), 30, 0.2, 0.2, 0.2, 0.1, block.getBlockData());
                             world.playSound(loc, Sound.BLOCK_STONE_BREAK, 1.0f, 0.8f);
 
@@ -1454,14 +1505,14 @@ public class DungeonManager {
     }
 
     public void triggerPlaceGroup(String worldName, String dungeonId, String groupId, int delayTicks) {
-        
+
         File file = new File(Main.getInstance().getDataFolder(), "Dungeons/" + dungeonId + ".yml");
         YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
         List<String> locStrings = config.getStringList("place-groups." + groupId);
 
         if (locStrings.isEmpty()) return;
 
-        
+
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -1485,7 +1536,7 @@ public class DungeonManager {
 
                         block.setType(mat);
 
-                        
+
                         world.spawnParticle(Particle.BLOCK, loc.clone().add(0.5, 0.5, 0.5), 20, 0.3, 0.3, 0.3, 0.1, mat.createBlockData());
                         world.playSound(loc, Sound.BLOCK_STONE_PLACE, 1.0f, 1.2f);
 
@@ -1500,7 +1551,7 @@ public class DungeonManager {
         File file = new File(Main.getInstance().getDataFolder(), "Dungeons/" + dungeonId + ".yml");
         YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 
-        
+
         String path = groupType + "." + groupId;
         List<String> list = config.getStringList(path);
 
@@ -1538,9 +1589,9 @@ public class DungeonManager {
         World world = Bukkit.getWorld(worldName);
         if (world == null) return;
 
-        
-        
-        FileConfiguration msgCfg = Main.getInstance().getMessagesConfig(); 
+
+
+        FileConfiguration msgCfg = Main.getInstance().getMessagesConfig();
 
         List<Map.Entry<Player, Double>> damageList = new ArrayList<>();
         for (Player p : world.getPlayers()) {
@@ -1550,18 +1601,18 @@ public class DungeonManager {
 
         damageList.sort((a, b) -> b.getValue().compareTo(a.getValue()));
 
-        
+
         String header = msgCfg.getString("damage-summary.header", "&6&l⭐ BẢNG XẾP HẠNG SÁT THƯƠNG ⭐");
         String format = msgCfg.getString("damage-summary.format", "&e#%rank%. &b%player% &7- &f%damage% &csát thương");
         String footer = msgCfg.getString("damage-summary.footer", "");
 
-        
+
         for (Player p : world.getPlayers()) {
             if (!header.isEmpty()) p.sendMessage(ChatColor.translateAlternateColorCodes('&', header));
 
             int rank = 1;
             for (Map.Entry<Player, Double> entry : damageList) {
-                
+
                 String line = format
                         .replace("%rank%", String.valueOf(rank))
                         .replace("%player%", entry.getKey().getName())
@@ -1582,7 +1633,7 @@ public class DungeonManager {
 
         for (String tier : tiers) {
             try {
-                
+
                 String[] parts = tier.split(":");
                 if (parts.length < 3) continue;
 
@@ -1593,13 +1644,13 @@ public class DungeonManager {
                 if (pDamage >= requiredDmg) {
                     double roll = random.nextDouble() * 100;
                     if (roll <= chance) {
-                        
+
                         ItemStack reward = getRequireItems().get(itemId);
 
                         if (reward != null) {
                             player.getInventory().addItem(reward.clone());
                         } else {
-                            
+
                             player.sendMessage("§c[Lỗi] ID vật phẩm " + itemId + " không tồn tại trong database!");
                         }
                     }

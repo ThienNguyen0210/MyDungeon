@@ -23,30 +23,35 @@ public class StaffPenaty implements Listener {
 
         String worldName = to.getWorld().getName();
 
-        
+
         if (!worldName.startsWith("temp_")) return;
 
         Player player = event.getPlayer();
         UUID uuid = player.getUniqueId();
         DungeonManager dm = Main.getInstance().getDungeonManager();
 
-        
+
+        if (player.hasPermission("mydungeon.bypass.teleport")) {
+            return;
+        }
+
+
         Set<UUID> authorizedPlayers = dm.getPlayersInDungeon(worldName);
 
-        
+
         if (!authorizedPlayers.contains(uuid)) {
-            
+
             event.setCancelled(true);
 
-            
+
             String msg = Main.getInstance().getMessagesConfig()
                     .getString("dungeon.errors.unauthorized-access", "&c&lRA NGOÀI MAU!");
             player.sendMessage(ChatColor.translateAlternateColorCodes('&', msg));
 
-            
+
             Bukkit.getLogger().warning("[Dungeon Security] " + player.getName() + " đã cố gắng truy cập trái phép vào " + worldName);
 
-            
+
             String dungeonId = worldName.split("_")[1];
             var dungeonConfig = dm.getDungeonConfig(dungeonId);
             if (dungeonConfig != null) {
