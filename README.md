@@ -19,6 +19,7 @@
 - **Block Group (break-group / place-group)** — kích hoạt phá hoặc đặt một nhóm block tại các vị trí định trước, kèm hiệu ứng particle/sound — dùng cho hiệu ứng cơ chế (mở cửa, sập sàn, dựng tường...).
 - **Hệ thống item yêu cầu/phần thưởng dùng chung (`require.yml`)** — lưu item dạng Base64 theo ID số, dùng làm điều kiện vào dungeon hoặc phần thưởng stage.
 - **Giới hạn lệnh trong dungeon** — chặn danh sách lệnh cấu hình sẵn khi người chơi đang trong instance.
+- ** còn nhiều ....
 
 ---
 
