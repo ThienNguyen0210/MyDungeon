@@ -33,12 +33,6 @@ public class ReloadDungeon implements SubCommand {
 
             
             processAndSortDungeons();
-
-            
-            if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
-                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "papi reload");
-            }
-
             player.sendMessage("");
             player.sendMessage("§a§lMyDungeon §8» §fĐã reload và đánh số lại Stage (1 → N)!");
             player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.8f);
